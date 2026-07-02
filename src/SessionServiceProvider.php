@@ -14,7 +14,7 @@ use Hydra\Session\Stores\NativeSessionStore;
 /**
  * Wires the session package into an application.
  *
- * Unlike a pure capability package (e.g. hydra/validation, whose stateless
+ * Unlike a pure capability package (e.g. hydrakit/validation, whose stateless
  * service just autowires), session binds an interface to a concrete backend and
  * supplies config — so it earns a provider, and ships its own rather than
  * leaving the app to hand-wire it.
