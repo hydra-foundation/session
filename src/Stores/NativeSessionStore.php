@@ -45,7 +45,12 @@ final class NativeSessionStore extends AbstractSession
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_name($this->config->name);
             session_set_cookie_params($this->config->cookieParams());
-            session_start();
+            // Session-fixation defense: with strict mode off (PHP's default),
+            // session_start() adopts any uninitialized id an attacker plants in
+            // the cookie, letting them pre-choose a victim's session id. Forcing
+            // it here — rather than trusting php.ini, which varies per host —
+            // guarantees unknown ids are rejected and replaced on every deploy.
+            session_start(['use_strict_mode' => true]);
         }
 
         $stored = $_SESSION[self::STORAGE_KEY] ?? [];
