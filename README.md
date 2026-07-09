@@ -31,3 +31,12 @@ http-only, `Lax` same-site, session-length cookie. `secure` defaults to false so
 local http works out of the box — set `SESSION_SECURE=true` over https. Invalid
 combinations (a bad `SameSite`, or `None` without `secure`) fail loudly at
 construction rather than flowing silently into PHP.
+
+## Lifecycle and scope
+
+Session data is only valid inside the window `StartSessionMiddleware` brackets
+around the request — every accessor throws `LogicException` outside it, so a
+read of stale state or a write that would never persist fails loud. The store
+is a request-scoped singleton and relies on Hydra building one container per
+request; see [docs/one-container-per-request.md](docs/one-container-per-request.md)
+for the full contract and the worker-runtime boundary.

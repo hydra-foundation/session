@@ -34,8 +34,8 @@ use Hydra\Session\Stores\NativeSessionStore;
  * container per request (classic SAPI), so "singleton" means one-per-request,
  * never cross-request. The store holds per-request state and the native
  * backend additionally writes through PHP's SAPI ($_SESSION, Set-Cookie), so
- * reusing a container across requests is unsupported — see
- * docs/one-container-per-request.md at the repo root.
+ * reusing a container across requests is unsupported — see this package's
+ * docs/one-container-per-request.md.
  */
 final class SessionServiceProvider extends ServiceProvider
 {

@@ -26,8 +26,8 @@ use LogicException;
  * end of start() and back at the end of save(). This is what makes the
  * one-container-per-request contract fail loud instead of losing data: a
  * write before the middleware opens the session, or after it has closed it,
- * would otherwise silently never persist (see docs/one-container-per-request.md
- * at the repo root).
+ * would otherwise silently never persist (see this package's
+ * docs/one-container-per-request.md).
  */
 abstract class AbstractSession implements SessionInterface, SessionLifecycleInterface
 {
