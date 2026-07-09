@@ -21,6 +21,12 @@ namespace Hydra\Session\Contracts;
  *
  * Implementations must treat falsy values ('0', 0, false, '') as real, stored
  * values; only an absent key (or one explicitly set to null) is "missing".
+ *
+ * Every method here requires an ACTIVE session — between the lifecycle's
+ * start() and save(), i.e. inside the window StartSessionMiddleware brackets
+ * around the request — and throws LogicException outside it. A read outside
+ * would see stale or empty state; a write would silently never persist; a
+ * regenerate would silently skip a fixation defense.
  */
 interface SessionInterface
 {

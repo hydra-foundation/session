@@ -7,6 +7,7 @@ namespace Hydra\Session\Tests\Unit;
 use Hydra\Session\Contracts\SessionInterface;
 use Hydra\Session\Contracts\SessionLifecycleInterface;
 use Hydra\Session\Stores\ArraySessionStore;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 
 final class ArraySessionStoreTest extends TestCase
@@ -121,8 +122,8 @@ final class ArraySessionStoreTest extends TestCase
     {
         $this->session->flash('status', 'saved');
 
-        // start() simulates the next request's middleware boot (ages flash).
-        $this->session->start();
+        // save() + start() simulates the next request's middleware lifecycle.
+        $this->nextRequest();
 
         $this->assertSame('saved', $this->session->getFlash('status'));
     }
@@ -131,17 +132,17 @@ final class ArraySessionStoreTest extends TestCase
     {
         $this->session->flash('status', 'saved');
 
-        $this->session->start(); // next request: visible
+        $this->nextRequest(); // next request: visible
         $this->assertSame('saved', $this->session->getFlash('status'));
 
-        $this->session->start(); // request after: gone
+        $this->nextRequest(); // request after: gone
         $this->assertNull($this->session->getFlash('status'));
     }
 
     public function test_flash_does_not_leak_into_data(): void
     {
         $this->session->flash('status', 'saved');
-        $this->session->start();
+        $this->nextRequest();
 
         // Flash lives in its own bucket — it is never exposed through all()/get().
         $this->assertSame([], $this->session->all());
@@ -165,5 +166,74 @@ final class ArraySessionStoreTest extends TestCase
 
         $this->assertNotSame($before, $this->session->id());
         $this->assertSame(42, $this->session->get('user'));
+    }
+
+    public function test_data_access_before_start_throws(): void
+    {
+        $fresh = new ArraySessionStore;
+
+        $this->expectException(LogicException::class);
+        $fresh->set('user', 42);
+    }
+
+    public function test_reads_before_start_throw_too(): void
+    {
+        $fresh = new ArraySessionStore;
+
+        $this->expectException(LogicException::class);
+        $fresh->get('user');
+    }
+
+    public function test_data_access_after_save_throws(): void
+    {
+        // The write-after-save window: a write here would silently never
+        // persist in production, so the reference store fails loud the same way.
+        $this->session->save();
+
+        $this->expectException(LogicException::class);
+        $this->session->set('user', 42);
+    }
+
+    public function test_flash_before_start_throws(): void
+    {
+        $fresh = new ArraySessionStore;
+
+        $this->expectException(LogicException::class);
+        $fresh->flash('status', 'saved');
+    }
+
+    public function test_id_outside_the_lifecycle_throws(): void
+    {
+        $fresh = new ArraySessionStore;
+
+        $this->expectException(LogicException::class);
+        $fresh->id();
+    }
+
+    public function test_regenerate_outside_the_lifecycle_throws(): void
+    {
+        // Regeneration is the login fixation defense — silently not rotating
+        // would be worse than failing.
+        $this->session->save();
+
+        $this->expectException(LogicException::class);
+        $this->session->regenerate();
+    }
+
+    public function test_double_start_is_a_noop(): void
+    {
+        // A second start() in the same request must not re-age (and so lose) flash.
+        $this->session->flash('status', 'saved');
+        $this->session->start();
+
+        $this->nextRequest();
+        $this->assertSame('saved', $this->session->getFlash('status'));
+    }
+
+    /** Close and reopen the store the way the middleware brackets a request. */
+    private function nextRequest(): void
+    {
+        $this->session->save();
+        $this->session->start();
     }
 }

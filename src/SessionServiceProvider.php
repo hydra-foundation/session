@@ -29,6 +29,13 @@ use Hydra\Session\Stores\NativeSessionStore;
  * An app that wants a different backend (e.g. a Redis store) can register this
  * provider and then rebind SessionInterface/SessionLifecycleInterface, or simply
  * not use this provider at all.
+ *
+ * These singletons are request-scoped by construction: Hydra builds one
+ * container per request (classic SAPI), so "singleton" means one-per-request,
+ * never cross-request. The store holds per-request state and the native
+ * backend additionally writes through PHP's SAPI ($_SESSION, Set-Cookie), so
+ * reusing a container across requests is unsupported — see
+ * docs/one-container-per-request.md at the repo root.
  */
 final class SessionServiceProvider extends ServiceProvider
 {

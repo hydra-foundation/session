@@ -20,19 +20,15 @@ use Hydra\Session\SessionConfig;
  * flash never collide with anything PHP or third-party code might store, and so
  * all() stays clean.
  *
- * The store is write-closed after save(): the in-memory arrays still accept
- * writes, but save() won't run again, so those writes would not persist. The
- * lifecycle middleware calls save() only after the controller has returned, so
- * no request code reaches that window today; should a post-response write path
- * ever exist, guard set()/flash() to fail loud rather than lose data silently.
+ * The store is closed after save(): the parent's lifecycle guard makes any
+ * data access after session_write_close() throw, so a post-response write can
+ * never be silently lost. The lifecycle middleware calls save() only after
+ * the controller has returned, so request code never sees that window.
  */
 final class NativeSessionStore extends AbstractSession
 {
     /** Reserved $_SESSION key holding this session's data + pending flash. */
     private const STORAGE_KEY = '_hydra';
-
-    /** Guards start()/save() so the lifecycle runs exactly once per request. */
-    private bool $started = false;
 
     public function __construct(private readonly SessionConfig $config) {}
 
@@ -83,13 +79,17 @@ final class NativeSessionStore extends AbstractSession
 
     public function id(): string
     {
+        $this->guardStarted();
+
         return session_id() ?: '';
     }
 
     public function regenerate(bool $deleteOld = true): void
     {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_regenerate_id($deleteOld);
-        }
+        // Silently not rotating would be worse than failing (see the guard's
+        // docblock), so this throws rather than no-ops outside the lifecycle.
+        $this->guardStarted();
+
+        session_regenerate_id($deleteOld);
     }
 }

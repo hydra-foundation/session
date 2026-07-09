@@ -44,6 +44,16 @@ final readonly class SessionConfig
             ));
         }
 
+        // A negative lifetime would flow into session_set_cookie_params() as an
+        // already-expired cookie — the session would silently never persist.
+        // Same fail-loud discipline as the SameSite guard above.
+        if ($lifetime < 0) {
+            throw new InvalidArgumentException(sprintf(
+                'Session lifetime must be >= 0 (0 = session cookie); got %d.',
+                $lifetime,
+            ));
+        }
+
         // Browsers reject a SameSite=None cookie that isn't also Secure, so the
         // pairing is invalid on its face — better to refuse it than ship a
         // cookie the client will drop.

@@ -110,6 +110,14 @@ final class SessionConfigTest extends TestCase
         new SessionConfig(secure: false, sameSite: 'None');
     }
 
+    public function test_rejects_a_negative_lifetime(): void
+    {
+        // A negative lifetime is an already-expired cookie: the session would
+        // silently never persist.
+        $this->expectException(InvalidArgumentException::class);
+        new SessionConfig(lifetime: -1);
+    }
+
     public function test_allows_same_site_none_when_secure(): void
     {
         $config = new SessionConfig(secure: true, sameSite: 'None');
