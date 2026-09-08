@@ -11,17 +11,10 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 /**
+ * Start session middleware
+ *
  * Brackets the request with the session lifecycle: open it on the way in, save
  * it on the way out.
- *
- * This is the sole caller of {@see SessionLifecycleInterface}, which is why the
- * lifecycle is kept off the controller-facing {@see SessionInterface} — a
- * controller works with the started session and never has to (or gets to) open
- * or close it.
- *
- * save() runs in a finally so the session is always persisted and closed, even
- * when an inner handler throws; the exception then propagates to the outer error
- * handler unchanged.
  */
 final class StartSessionMiddleware implements MiddlewareInterface
 {

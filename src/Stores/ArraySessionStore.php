@@ -5,20 +5,9 @@ declare(strict_types=1);
 namespace Hydra\Session\Stores;
 
 /**
+ * Array session store
+ *
  * A pure, in-memory session store.
- *
- * The reference backend: state lives in the {@see AbstractSession} arrays and
- * never leaves the object, so the contract can be exercised with no global
- * state and no I/O. It backs tests (and any context wanting an ephemeral
- * session). {@see NativeSessionStore} is the production backend.
- *
- * Because the data is already in memory, start() only ages flash and save() has
- * nothing to persist. The id is a random token rotated on regenerate().
- *
- * The parent's lifecycle guard applies here exactly as in production: data
- * access outside start()→save() throws. That is deliberate — a reference
- * store that worked without start() could never catch lifecycle bugs in the
- * code it exists to test.
  */
 final class ArraySessionStore extends AbstractSession
 {

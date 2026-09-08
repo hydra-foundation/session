@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace Hydra\Session\Contracts;
 
 /**
- * The lifecycle half of a session, held only by the framework's session
- * middleware — never handed to controllers.
+ * Session lifecycle interface
  *
- * Keeping these two methods off {@see SessionInterface} is the boundary: a
- * controller is given the data surface and literally cannot {@see save()} (and
- * so cannot close the session early, leaving later writes to vanish). The
- * middleware brackets the request — start() on the way in, save() on the way
- * out — and is the single caller of both.
+ * The lifecycle half of a session, held only by the framework's session
+ * middleware and never handed to controllers.
  */
 interface SessionLifecycleInterface
 {

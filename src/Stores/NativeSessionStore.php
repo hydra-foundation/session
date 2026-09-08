@@ -7,23 +7,9 @@ namespace Hydra\Session\Stores;
 use Hydra\Session\SessionConfig;
 
 /**
+ * Native session store
+ *
  * The production session backend, built on PHP's native session.
- *
- * It keeps the same in-memory model as {@see AbstractSession} and treats
- * $_SESSION as the persistence boundary: {@see start()} hydrates the arrays from
- * $_SESSION (and ages flash), {@see save()} writes them back and closes the
- * session. {@see regenerate()} is the one other native-session touchpoint — it
- * rotates the id only and never touches our reserved storage key, so it is safe
- * to call between start() and save() without disturbing the in-memory model.
- *
- * State is namespaced under a single reserved key so the framework's data and
- * flash never collide with anything PHP or third-party code might store, and so
- * all() stays clean.
- *
- * The store is closed after save(): the parent's lifecycle guard makes any
- * data access after session_write_close() throw, so a post-response write can
- * never be silently lost. The lifecycle middleware calls save() only after
- * the controller has returned, so request code never sees that window.
  */
 final class NativeSessionStore extends AbstractSession
 {

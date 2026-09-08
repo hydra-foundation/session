@@ -12,30 +12,9 @@ use Hydra\Session\Contracts\SessionLifecycleInterface;
 use Hydra\Session\Stores\NativeSessionStore;
 
 /**
+ * Session service provider
+ *
  * Wires the session package into an application.
- *
- * Unlike a pure capability package (e.g. hydrakit/validation, whose stateless
- * service just autowires), session binds an interface to a concrete backend and
- * supplies config — so it earns a provider, and ships its own rather than
- * leaving the app to hand-wire it.
- *
- * The crux is that {@see NativeSessionStore} is bound once and exposed behind
- * BOTH contracts: the controller-facing {@see SessionInterface} and the
- * middleware-facing {@see SessionLifecycleInterface} resolve to the very same
- * instance. The middleware's start()/save() and a controller's get()/set() must
- * act on one store (and one $_SESSION) within a request — two instances would
- * silently diverge.
- *
- * An app that wants a different backend (e.g. a Redis store) can register this
- * provider and then rebind SessionInterface/SessionLifecycleInterface, or simply
- * not use this provider at all.
- *
- * These singletons are request-scoped by construction: Hydra builds one
- * container per request (classic SAPI), so "singleton" means one-per-request,
- * never cross-request. The store holds per-request state and the native
- * backend additionally writes through PHP's SAPI ($_SESSION, Set-Cookie), so
- * reusing a container across requests is unsupported — see this package's
- * docs/one-container-per-request.md.
  */
 final class SessionServiceProvider extends ServiceProvider
 {

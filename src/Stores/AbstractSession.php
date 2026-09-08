@@ -9,25 +9,10 @@ use Hydra\Session\Contracts\SessionLifecycleInterface;
 use LogicException;
 
 /**
+ * Abstract session
+ *
  * Shared session semantics: the data and flash behaviour every backend has in
  * common, with no opinion on where the bytes live.
- *
- * Subclasses own only the parts that differ between backends:
- *  - {@see start()} / {@see save()} — how state is loaded and persisted.
- *  - {@see id()} / {@see regenerate()} — how the session id is sourced/rotated.
- *
- * They drive flash aging by calling {@see ageFlash()} from start(), once the
- * backing state is in memory. Everything else — get/set/has/remove/all/clear
- * and the flash read/write — operates on the in-memory arrays below and is
- * identical regardless of backend.
- *
- * The lifecycle is enforced here, for every backend: data methods throw
- * outside the start()→save() window. Subclasses flip {@see $started} at the
- * end of start() and back at the end of save(). This is what makes the
- * one-container-per-request contract fail loud instead of losing data: a
- * write before the middleware opens the session, or after it has closed it,
- * would otherwise silently never persist (see this package's
- * docs/one-container-per-request.md).
  */
 abstract class AbstractSession implements SessionInterface, SessionLifecycleInterface
 {

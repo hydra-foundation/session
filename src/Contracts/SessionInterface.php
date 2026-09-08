@@ -5,28 +5,10 @@ declare(strict_types=1);
 namespace Hydra\Session\Contracts;
 
 /**
+ * Session interface
+ *
  * The everyday, controller-facing session: a request-scoped key/value store
  * that persists across requests for one client.
- *
- * Two concerns live here:
- *
- *  - Data (id/regenerate/get/set/has/remove/all/clear) — the values you stash
- *    for a client, plus the id controls used on a privilege change.
- *  - Flash (flash/getFlash) — values that live for exactly the next request.
- *
- * The lifecycle (opening, aging flash, persisting) is deliberately NOT here —
- * it belongs to {@see SessionLifecycleInterface}, which only the framework's
- * session middleware holds, so a controller can never close the session out
- * from under the rest of the request.
- *
- * Implementations must treat falsy values ('0', 0, false, '') as real, stored
- * values; only an absent key (or one explicitly set to null) is "missing".
- *
- * Every method here requires an ACTIVE session — between the lifecycle's
- * start() and save(), i.e. inside the window StartSessionMiddleware brackets
- * around the request — and throws LogicException outside it. A read outside
- * would see stale or empty state; a write would silently never persist; a
- * regenerate would silently skip a fixation defense.
  */
 interface SessionInterface
 {

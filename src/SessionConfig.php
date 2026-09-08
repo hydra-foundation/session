@@ -8,16 +8,7 @@ use Hydra\Core\Environment;
 use InvalidArgumentException;
 
 /**
- * Typed, immutable view of the session cookie settings.
- *
- * Built once from {@see Environment} by {@see SessionServiceProvider}, the same
- * pattern the app's config value objects use. These map directly onto PHP's
- * session cookie params; {@see NativeSessionStore} reads them when it starts the
- * session. Defaults are the safe-by-default choices for a first-party app:
- * http-only, Lax same-site, session-length cookie.
- *
- * `secure` defaults to false so local http development works out of the box;
- * set SESSION_SECURE=true in any environment served over https.
+ * Session config
  */
 final readonly class SessionConfig
 {
@@ -79,8 +70,6 @@ final readonly class SessionConfig
 
     /**
      * The settings shaped for session_set_cookie_params().
-     *
-     * @return array{lifetime: int, path: string, domain: string, secure: bool, httponly: bool, samesite: string}
      */
     public function cookieParams(): array
     {
